@@ -1,0 +1,627 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Radar BOE IA">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head><body>
+<title>Radar BOE IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: menú lateral azul noche; la portada dice primero cuántas normas se han revisado, cuántas valen y cuántas no, y por qué. */
+:root{
+  --bg:#edf1f6; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#0d1a2b; --muted:#566377; --line:#dbe2ec;
+  --night:#0a1a2e; --night-2:#10263f; --night-ink:#d6e2f0; --night-mute:#7f95b0; --scope:#47d1c4;
+  --accent:#1b63b5; --accent-ink:#ffffff; --accent-soft:#e2edfa;
+  --alta:#c2332d; --alta-bg:#fde8e6; --media:#9a6200; --media-bg:#fdf0d5; --ok:#1d7a4c; --ok-bg:#ddf3e7; --info:#566377; --info-bg:#e9edf3;
+  --area-l:42%; --area-bg-l:94%; --area-s:62%;
+  --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(13,26,43,.06),0 8px 24px -12px rgba(13,26,43,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b121c; --surface:#131d2a; --surface-2:#182434; --ink:#e6edf5; --muted:#98a6b9; --line:#253345;
+  --night:#07111d; --night-2:#0d1d30; --night-ink:#d6e2f0; --night-mute:#7086a1; --scope:#47d1c4;
+  --accent:#78b3f2; --accent-ink:#06121f; --accent-soft:#16283d;
+  --alta:#ff8a7f; --alta-bg:#3a1c1a; --media:#f1c35c; --media-bg:#33280e; --ok:#6fd4a1; --ok-bg:#132f20; --info:#a8b5c6; --info-bg:#212d3c;
+  --area-l:70%; --area-bg-l:18%; --area-s:55%; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b121c; --surface:#131d2a; --surface-2:#182434; --ink:#e6edf5; --muted:#98a6b9; --line:#253345;
+  --night:#07111d; --night-2:#0d1d30; --night-ink:#d6e2f0; --night-mute:#7086a1; --scope:#47d1c4;
+  --accent:#78b3f2; --accent-ink:#06121f; --accent-soft:#16283d;
+  --alta:#ff8a7f; --alta-bg:#3a1c1a; --media:#f1c35c; --media-bg:#33280e; --ok:#6fd4a1; --ok-bg:#132f20; --info:#a8b5c6; --info-bg:#212d3c;
+  --area-l:70%; --area-bg-l:18%; --area-s:55%; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  color-scheme:dark}
+html,body{height:100%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+
+/* Menú */
+.side{background:var(--night);color:var(--night-ink);display:flex;flex-direction:column;gap:22px;padding:22px 14px;position:sticky;top:0;height:100vh;max-height:100%}
+.brand{display:flex;gap:11px;align-items:center;padding:0 6px}
+.avatar{width:42px;height:42px;flex:none;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.brand b{display:block;font:800 18px/1.1 var(--f-display);color:#fff;letter-spacing:-.01em}
+.brand small{color:var(--night-mute);font-size:12px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav-label{font:600 11px/1 var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--night-mute);padding:14px 10px 6px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:10px;color:var(--night-ink);text-decoration:none;font-weight:500;transition:background .15s}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a.on{background:linear-gradient(90deg,rgba(71,209,196,.18),rgba(71,209,196,.04));color:#fff;box-shadow:inset 2px 0 0 var(--scope)}
+.nav svg{width:19px;height:19px;flex:none}
+.nav .count{margin-left:auto;font:600 12px/1 var(--f-mono);background:var(--scope);color:var(--night);padding:3px 7px;border-radius:99px}
+.side-foot{margin-top:auto;font-size:12px;color:var(--night-mute);padding:0 10px;line-height:1.5}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;padding-block:14px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:sticky;top:env(safe-area-inset-top,0px);z-index:5;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.crumbs{color:var(--muted);font-size:13px}.crumbs b{color:var(--ink)}
+.grow{flex:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:7px 14px;width:min(320px,100%)}
+.search input{border:0;background:none;outline:none;width:100%;min-width:0}
+.search svg{width:16px;height:16px;color:var(--muted);flex:none}
+.day select{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:7px 12px}
+.view{padding-block:26px 56px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:26px;max-width:1220px;width:100%}
+h1{font:800 34px/1.1 var(--f-display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+h2{font:700 21px/1.25 var(--f-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font:600 12px/1.2 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+.sub{color:var(--muted);margin:6px 0 0;max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.pad{padding:20px 22px}
+.sec-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 14px;cursor:pointer;font-weight:500;text-decoration:none;color:var(--ink);font-size:14px;transition:border-color .15s,transform .15s}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;font:600 11.5px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.pill.p-pend::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.p-alta{color:var(--alta)}.p-media{color:var(--media)}
+.p-pend{color:var(--ink)}.p-leida{color:var(--muted)}.p-env{color:var(--ok)}
+.area{--c:hsl(var(--h) var(--area-s) var(--area-l));--cb:hsl(var(--h) 60% var(--area-bg-l));display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px 5px 7px;border-radius:99px;background:var(--cb);color:var(--c);white-space:nowrap}
+.adot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.areas-t{display:inline-flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13px;font-weight:500;color:var(--muted)}.areas-t .sep{color:var(--line)}
+.mono{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.meter{display:inline-flex;gap:3px;align-items:center}
+.meter i{width:16px;height:6px;border-radius:3px;background:var(--line)}
+.meter.r3 i{background:var(--alta)}.meter.r2 i:nth-child(-n+2){background:var(--media)}
+
+
+/* Embudo */
+.funnel{display:grid;gap:12px}
+.fbar{display:grid;grid-template-columns:150px minmax(0,1fr) 60px;gap:14px;align-items:center}
+.fbar .lab{font-size:14px;color:var(--muted)}
+.fbar .track{height:14px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.fbar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--scope));transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.fbar b{font:700 22px/1 var(--f-display);text-align:right;font-variant-numeric:tabular-nums}
+.duo{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.ev{font-size:12.5px}
+
+/* Semana */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wd{border:1px solid var(--line);border-radius:12px;padding:10px 8px;min-height:104px;display:flex;flex-direction:column;gap:6px;background:var(--surface-2)}
+.wd.hoy{border-color:var(--accent);background:var(--accent-soft)}
+.wd .n{font:700 20px/1 var(--f-display)}.wd .w{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.ev{font-size:11.5px;line-height:1.3;padding:5px 6px;border-radius:7px;background:var(--surface);border-left:3px solid var(--accent);text-decoration:none;color:var(--ink);display:block}
+
+/* Tarjetas de fichas */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.fc{display:flex;flex-direction:column;gap:12px;padding:18px 20px;text-decoration:none;color:inherit;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.fc:hover{border-color:var(--accent)}
+.fc .top-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fc h2{font-size:19px}
+.fc p{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fc .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:99px;cursor:pointer;color:var(--muted);font-weight:500}
+.tab.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.tab .n{font:600 11px/1 var(--f-mono);margin-left:6px;opacity:.8}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters select{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:7px 12px}
+.empty{padding:36px 20px;color:var(--muted);text-align:center}
+
+/* Ficha */
+.fhero{border-radius:16px;padding:26px 30px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);}
+.fhero h1{font-size:32px;margin:12px 0 10px;max-width:30ch}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.ptabs{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:0 14px;overflow-x:auto}
+.ptab{border:0;background:none;padding:14px 12px;cursor:pointer;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.ptab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.pane{padding:22px;display:flex;flex-direction:column;gap:18px}
+.field h3{margin-bottom:6px}.field p{margin:0;max-width:70ch}
+.explain{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;background:var(--accent-soft);border-radius:14px;padding:18px;font-size:16.5px;line-height:1.65}
+.explain .q{width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 22px/1 var(--f-display)}
+.aside{display:flex;flex-direction:column;gap:16px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:10px;padding-bottom:14px;position:relative}
+.tl li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:6px;box-shadow:0 0 0 4px var(--accent-soft)}
+.tl li:not(:last-child)::after{content:"";position:absolute;left:4.5px;top:18px;bottom:0;width:1px;background:var(--line)}
+.tl b{display:block}.tl span{font-size:13px;color:var(--muted)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.actions .btn{justify-content:center}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2);resize:vertical}
+.saved,.note{font-size:13px;color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:10px}
+.msg{padding:12px 15px;border-radius:16px;max-width:72ch;white-space:pre-wrap}
+.msg.yo{background:var(--accent);color:var(--accent-ink);align-self:flex-end;border-bottom-right-radius:4px}
+.msg.ia{background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;border:1px solid var(--line);border-radius:99px;padding:9px 14px;background:var(--surface-2)}
+.sugg{display:flex;gap:6px;flex-wrap:wrap}
+.sugg button{border:1px dashed var(--line);background:none;border-radius:99px;padding:6px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
+.sugg button:hover{border-color:var(--accent);color:var(--accent)}
+.toast{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom,0px));right:calc(22px + env(safe-area-inset-right,0px));background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;z-index:20;box-shadow:var(--shadow)}
+
+/* Áreas, glosario, cómo funciona */
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.ac{--c:hsl(var(--h) var(--area-s) var(--area-l));padding:18px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;transition:transform .18s}
+.ac:hover{transform:translateY(-3px)}
+.ac .ic{width:42px;height:42px;border-radius:12px;background:hsl(var(--h) 60% var(--area-bg-l));color:var(--c);display:grid;place-items:center}
+.ac .ic svg{width:22px;height:22px}
+.ac .num{font:800 30px/1 var(--f-display)}.ac .num.zero{color:var(--muted);opacity:.6}
+.gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.gc{padding:18px}.gc b{font:700 18px/1.2 var(--f-display);display:block;margin-bottom:6px}.gc p{margin:0;color:var(--muted)}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.st{padding:20px;display:flex;flex-direction:column;gap:8px}
+.st .k{font:800 40px/1 var(--f-display);color:var(--accent)}
+.st b{font-size:16px}
+
+/* Portada: lo revisado, lo que vale y lo que no */
+.triage{padding:26px 28px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.triage h1{margin-top:10px}
+.tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tri>div{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.tri .lbl{font:600 12px/1 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tri b{font:800 44px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.tri .ok{background:var(--ok-bg);border-color:transparent}.tri .ok b,.tri .ok .lbl{color:var(--ok)}
+.tri .btn{margin-top:auto}
+.split{height:10px;border-radius:99px;overflow:hidden;background:var(--line)}
+.split i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.resumen{font-size:18px;line-height:1.6;margin:10px 0 0;max-width:70ch}
+.grps{display:flex;flex-direction:column;margin-top:12px}
+.grp{border-top:1px solid var(--line)}
+.grp summary{display:flex;justify-content:space-between;gap:12px;padding:13px 0;cursor:pointer;font-weight:500;list-style:none}
+.grp summary::-webkit-details-marker{display:none}
+.grp summary::before{content:"›";color:var(--muted);transition:transform .15s;display:inline-block;width:12px}
+.grp[open] summary::before{transform:rotate(90deg)}
+.grp summary>span:first-of-type{flex:1;min-width:0}
+.grp .cnt{font:600 13px/1 var(--f-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:5px 9px;height:fit-content}
+.grp ul{list-style:none;margin:0;padding:0 0 12px 24px;display:flex;flex-direction:column;gap:10px}
+.grp li{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.grp li .note{width:100%}
+
+/* Guía */
+.guide-hero{padding:30px 32px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--accent-soft),var(--surface) 60%)}
+.guide-hero h1{font-size:40px}
+.lead{font-size:18px;line-height:1.6;margin:0;max-width:62ch}
+.gsec{display:flex;flex-direction:column;gap:16px}
+.gh{display:flex;gap:14px;align-items:flex-start}
+.gnum{width:34px;height:34px;flex:none;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:700 15px/1 var(--f-display)}
+.gh .sub{margin-top:2px}
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;position:relative}
+.pstep{padding:18px;display:flex;flex-direction:column;gap:6px;position:relative}
+.pstep:not(:last-child)::after{content:"→";position:absolute;right:-14px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:18px;z-index:1}
+.pstep .hora{font:600 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.pstep .big{font:800 38px/1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:4px}
+.pstep.ok{background:var(--ok-bg);border-color:transparent}.pstep.ok .big{color:var(--ok)}
+.anat{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:36px;align-items:start}
+.demo{position:relative;overflow:visible;pointer-events:none}
+.mk{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 12px/1 var(--f-ui);box-shadow:0 0 0 3px var(--bg)}
+.mk.s{position:static;box-shadow:none;flex:none}
+.legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.legend-list li{display:flex;gap:12px}
+.legend-list b{display:block}.legend-list div span{color:var(--muted)}
+.routine{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.rstep{padding:18px;display:flex;flex-direction:column;gap:6px}
+.rn{font:800 15px/1 var(--f-mono);color:var(--accent)}
+.flowstate{padding:14px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.arr{color:var(--muted)}
+.secs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sc{padding:18px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit}
+a.sc:hover{border-color:var(--accent)}
+.faq{padding:6px 22px}
+.faq details{border-top:1px solid var(--line)}.faq details:first-child{border-top:0}
+.faq summary{padding:15px 0;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--accent);font-size:20px;line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin:0 0 16px;color:var(--muted);max-width:72ch}
+@media (max-width:980px){.pipe,.routine{grid-template-columns:repeat(2,minmax(0,1fr))}.pstep::after{display:none}.anat{grid-template-columns:minmax(0,1fr)}.secs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.pipe,.routine,.secs{grid-template-columns:minmax(0,1fr)}.guide-hero{padding:22px 18px}.guide-hero h1{font-size:30px}.demo .mk{display:none}}
+
+@media (max-width:980px){.layout,.duo{grid-template-columns:minmax(0,1fr)}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:10;gap:0}
+  .brand,.side-foot,.nav-label,.nav .count,.nav .extra{display:none}
+  .nav{flex-direction:row;justify-content:space-around;width:100%}
+  .nav a{flex-direction:column;gap:3px;font-size:11px;padding:6px 8px}
+  .nav a.on{box-shadow:inset 0 2px 0 var(--scope)}
+  .main{padding-bottom:76px}
+  .top,.view{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .search{width:100%}
+  .fbar{grid-template-columns:110px minmax(0,1fr) 44px;gap:10px}
+  .week{grid-template-columns:repeat(7,minmax(92px,1fr));overflow-x:auto;padding-bottom:4px}
+  .fhero{padding:22px 18px}.fhero h1{font-size:26px}
+  .flow,.tri{grid-template-columns:minmax(0,1fr)}
+  .triage{padding:22px 18px}
+  h1{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg class="avatar" viewBox="0 0 44 44" role="img" aria-label="Radar BOE"><rect width="44" height="44" rx="12" fill="#1b3556"/><rect x="11" y="8" width="22" height="28" rx="2" fill="#f4f1e8"/><rect x="11" y="8" width="22" height="6.5" rx="2" fill="#c8a24a"/><rect x="11" y="12" width="22" height="2.5" fill="#c8a24a"/><text x="22" y="13.2" text-anchor="middle" font-family="Georgia,serif" font-size="5.2" font-weight="700" fill="#1b3556" letter-spacing=".4">BOE</text><rect x="14" y="17.5" width="16" height="1.6" rx=".8" fill="#1b3556" opacity=".75"/><rect x="14" y="21" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="14" y="23.5" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="14" y="26" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="14" y="28.5" width="5" height="1.2" rx=".6" fill="#8a94a3"/><rect x="23" y="21" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="23" y="23.5" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="23" y="26" width="7" height="1.2" rx=".6" fill="#8a94a3"/><rect x="23" y="28.5" width="6" height="1.2" rx=".6" fill="#8a94a3"/><circle cx="31.5" cy="32.5" r="5" fill="#b4372f"/><path d="M29.4 32.6l1.4 1.4 2.8-2.9" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><b>Radar BOE</b><small>Boletín diario</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#inicio" data-v="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+      <a href="#bandeja" data-v="bandeja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"/></svg>Bandeja<span class="count" id="nav-pend">0</span></a>
+      <a href="#plazos" data-v="plazos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plazos</a>
+      <a href="#areas" data-v="areas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Áreas</a>
+      <a href="#como-funciona" data-v="como-funciona"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>Guía</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="crumbs" id="crumbs"></div>
+      <div class="grow"></div>
+      <label class="search" for="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar normas, áreas, organismos" autocomplete="off"></label>
+      <label class="day" for="dia"><select id="dia" aria-label="Día del BOE"></select></label>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="application/json" id="datos">{"dias": {"20261102": {"fecha": "20261102", "total_boe": 132, "revisadas": 59, "resumen_del_dia": "Día tranquilo. Lo más relevante para el despacho es la Orden TED/1152/2026, que cambia cómo se calcula la retribución de las plantas de cogeneración con biomasa y entra en vigor mañana. Además, el Tesoro convoca la subasta de Obligaciones del Estado del 5 de noviembre y se publican dos declaraciones de impacto ambiental para proyectos renovables híbridos.", "fichas": [{"id": "BOE-A-2026-22888", "titulo": "Orden TED/1152/2026, de 27 de octubre, por la que se modifica la Orden TED/526/2024, de 31 de mayo, sobre la metodología de actualización de la retribución a la operación de las instalaciones tipo cuyos costes de explotación dependan esencialmente del precio del combustible", "departamento": "Ministerio para la Transición Ecológica y el Reto Demográfico", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22888", "relevancia": 3, "areas": ["Energía", "Regulatorio financiero"], "que_cambia": "Añade un nuevo artículo 12 bis con una fórmula propia para actualizar la retribución a la operación de las instalaciones de cogeneración con biomasa, que hasta ahora se calculaba igual que la de las plantas de biomasa que solo producen electricidad. La fórmula nueva tiene en cuenta el ahorro por aprovechar el calor. Además, las actualizaciones trimestrales ya no necesitan un informe previo de Hacienda, basta con comunicárselas.", "a_quien_afecta": "Titulares e inversores de plantas de cogeneración con biomasa en el régimen retributivo específico, en concreto las que obtengan ese derecho después de la entrada en vigor de la orden. También sirve como dato para fondos y bancos que financian o compran proyectos de biomasa.", "accion_para_ilp": "Avisar a los clientes del sector energético con proyectos de biomasa o cogeneración. Tenerlo en cuenta en las due diligence y en los modelos de ingresos de operaciones de M&A o de financiación de este tipo de plantas. Puede dar para una nota breve en el blog.", "plazos": "Entra en vigor el 3 de noviembre de 2026, el día siguiente a su publicación. La retribución se sigue actualizando cada trimestre natural.", "para_no_juristas": "Algunas plantas que producen electricidad con renovables o con cogeneración cobran del sistema eléctrico una ayuda regulada además del precio de mercado. Una parte de esa ayuda, la 'retribución a la operación', cubre los costes de funcionamiento y se revisa cada trimestre según el precio del combustible. La cogeneración produce a la vez electricidad y calor útil. Esta orden ministerial, que es una norma de rango inferior a la ley aprobada por un ministro, ajusta la fórmula para que esas plantas cobren según sus costes reales.", "titulo_corto": "Nueva fórmula de retribución para la cogeneración con biomasa", "fechas_clave": [{"fecha": "2026-11-03", "texto": "Entra en vigor la Orden TED/1152/2026"}]}, {"id": "BOE-A-2026-22997", "titulo": "Resolución de 30 de octubre de 2026, de la Dirección General del Tesoro y Política Financiera, por la que se disponen determinadas emisiones de Obligaciones del Estado en el mes de noviembre de 2026 y se convocan las correspondientes subastas", "departamento": "Ministerio de Economía, Comercio y Empresa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22997", "relevancia": 2, "areas": ["Regulatorio financiero"], "que_cambia": "Convoca la subasta del 5 de noviembre de 2026, en la que se ofrecen nuevos tramos de cuatro Obligaciones del Estado ya existentes: al 3,10 % con vencimiento en 2031, al 3,40 % a diez años con vencimiento en 2036, al 3,50 % a quince años con vencimiento en 2041 y una indexada a la inflación europea al 0,70 % con vencimiento en 2033.", "a_quien_afecta": "Bancos, gestoras de fondos y aseguradoras que invierten en deuda pública, y en especial las entidades Creadores de Mercado, que son las únicas que pueden acudir a la segunda vuelta de la subasta.", "accion_para_ilp": "No exige acción. Es un dato de mercado útil para seguir los tipos de la deuda española y para comentarios de mercado.", "plazos": "Subasta el 5 de noviembre de 2026. Puesta en circulación y pago el 10 de noviembre de 2026.", "para_no_juristas": "El Estado se financia pidiendo dinero prestado a los inversores mediante títulos de deuda. Las 'Obligaciones' son los títulos a más largo plazo (más de cinco años). El Tesoro las vende en subastas con un calendario fijado a principios de año, y esta resolución concreta qué títulos salen a la venta este mes.", "titulo_corto": "Subasta de Obligaciones del Estado de noviembre", "fechas_clave": [{"fecha": "2026-11-05", "texto": "Subasta de Obligaciones del Estado"}, {"fecha": "2026-11-10", "texto": "Pago y puesta en circulación de las Obligaciones"}]}, {"id": "BOE-A-2026-22987", "titulo": "Resolución de 22 de octubre de 2026, de la Dirección General de Calidad y Evaluación Ambiental, por la que se formula declaración de impacto ambiental del «Proyecto Módulo de Generación Eólica \"Las Quinientas\", para su hibridación con el parque fotovoltaico existente \"Las Quinientas\", y para su infraestructura de evacuación, en la provincia de Cádiz»", "departamento": "Ministerio para la Transición Ecológica y el Reto Demográfico", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22987", "relevancia": 2, "areas": ["Energía"], "que_cambia": "El Ministerio fija las condiciones ambientales para añadir un módulo eólico a una planta fotovoltaica que ya funciona en Cádiz. El promotor es BRUC Las Quinientas, SL. El proyecto queda reducido a cinco aerogeneradores de 6,6 MW, frente a los once que se planteaban al principio, con medidas como la parada definitiva de un aerogenerador si causa demasiadas colisiones de aves.", "a_quien_afecta": "Al promotor y a quien financie o invierta en el proyecto. Como referencia, a cualquier promotor de proyectos de hibridación eólica y solar.", "accion_para_ilp": "Útil como precedente de las condiciones que el Ministerio impone a los proyectos híbridos, por ejemplo la reducción del número de aerogeneradores y el control de la avifauna, en due diligence de proyectos renovables.", "plazos": "No indica en el extracto revisado. El proyecto todavía necesita su autorización administrativa.", "para_no_juristas": "Antes de autorizar un proyecto grande, la Administración evalúa su impacto en el medio ambiente. La 'declaración de impacto ambiental' (DIA) es el informe final de esa evaluación y fija las condiciones con las que puede construirse. 'Hibridar' significa sumar otra tecnología a una planta que ya existe, aquí eólica a una solar, aprovechando la misma conexión a la red.", "titulo_corto": "DIA del módulo eólico «Las Quinientas» (Cádiz)", "fechas_clave": []}, {"id": "BOE-A-2026-22986", "titulo": "Resolución de 19 de octubre de 2026, de la Dirección General de Calidad y Evaluación Ambiental, por la que se formula declaración de impacto ambiental del proyecto «Hibridación de la planta solar fotovoltaica PFV Herrera de los Navarros, de 21 MW de potencia instalada, con el parque eólico Herrera de los Navarros existente de 35 MW y su infraestructura de evacuación, en la provincia de Zaragoza»", "departamento": "Ministerio para la Transición Ecológica y el Reto Demográfico", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22986", "relevancia": 2, "areas": ["Energía"], "que_cambia": "El Ministerio fija las condiciones ambientales para añadir una planta solar de 21 MW al parque eólico de 35 MW que ya funciona en Herrera de los Navarros (Zaragoza). El promotor es Sistemas Energéticos Barandón, SA. La resolución obliga a cumplir las medidas preventivas y correctoras del estudio de impacto ambiental y las condiciones adicionales que establece.", "a_quien_afecta": "Al promotor y a quien financie o invierta en el proyecto. Como referencia, a otros promotores de proyectos de hibridación.", "accion_para_ilp": "Seguimiento del sector renovable. Puede servir para un repaso de las DIA de hibridación publicadas este año en el blog del área de Energía.", "plazos": "No indica en el extracto revisado. El proyecto todavía necesita su autorización administrativa.", "para_no_juristas": "Es el mismo tipo de documento que la ficha anterior, en este caso para añadir paneles solares a un parque eólico que ya existe. Que se publique la DIA no significa que el proyecto ya esté autorizado, es un paso previo obligatorio.", "titulo_corto": "DIA de la hibridación solar de Herrera de los Navarros (Zaragoza)", "fechas_clave": []}], "filtradas_auto": [{"motivo": "Oposiciones y concursos de personal", "n": 50}, {"motivo": "Nombramientos, ceses y jubilaciones", "n": 20}, {"motivo": "Anuncios de comunidades de regantes y otros entes", "n": 3}], "descartadas": [{"id": "BOE-A-2026-22959", "titulo_corto": "Acuerdo de Sala de Gobierno del Tribunal Supremo de 28 de septiembre de 2026, sobre composición y funcionamiento de…", "departamento": "Consejo General del Poder Judicial", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22959", "relevancia": 1, "motivo": "Reparto interno de asuntos y ponencias en el Tribunal Supremo. No cambia derechos ni obligaciones de los clientes.", "leida_a_fondo": true}, {"id": "BOE-A-2026-22960", "titulo_corto": "Acuerdo de Sala de Gobierno del Tribunal Supremo de 28 de septiembre de 2026, sobre modificación del Acuerdo de Sala…", "departamento": "Consejo General del Poder Judicial", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22960", "relevancia": 1, "motivo": "Reparto interno de asuntos y ponencias en el Tribunal Supremo. No cambia derechos ni obligaciones de los clientes.", "leida_a_fondo": true}, {"id": "BOE-A-2026-22961", "titulo_corto": "Acuerdo de Sala de Gobierno del Tribunal Supremo de 28 de septiembre de 2026, sobre modificación en las normas…", "departamento": "Consejo General del Poder Judicial", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22961", "relevancia": 1, "motivo": "Reparto interno de asuntos y ponencias en el Tribunal Supremo. No cambia derechos ni obligaciones de los clientes.", "leida_a_fondo": true}, {"id": "BOE-A-2026-22962", "titulo_corto": "Convenio con la Universidad CEU Cardenal Herrera, para la realización de prácticas académicas externas, acciones…", "departamento": "Ministerio de Defensa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22962", "relevancia": 0, "motivo": "Convenio de prácticas entre el Ministerio de Defensa y una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22963", "titulo_corto": "Adenda de prórroga al Convenio con la Fundación Museo Naval, para regular el uso de espacios de la Armada.", "departamento": "Ministerio de Defensa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22963", "relevancia": 0, "motivo": "Uso de espacios de la Armada por una fundación.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22964", "titulo_corto": "Normas para la aplicación de los anticipos de caja fija y los libramientos a justificar en el Ministerio de Defensa", "departamento": "Ministerio de Defensa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22964", "relevancia": 0, "motivo": "Gestión del gasto interno del Ministerio de Defensa.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22965", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y la Comunidad de Madrid, para la realización de la fase de…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22965", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22966", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Albox, para la incorporación de los Cuerpos…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22966", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22967", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Palma del Río, para la incorporación del…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22967", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22968", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Adra, para la incorporación del Cuerpo de…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22968", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22969", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Betxi, para la incorporación del Cuerpo de…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22969", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22970", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Rojales, para la incorporación del Cuerpo…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22970", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22971", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de A Rúa, para la incorporación del Cuerpo de…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22971", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22972", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Álora, para la incorporación del Cuerpo de…", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22972", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22973", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Avilés, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22973", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22974", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Casarrubios del Monte, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22974", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22975", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Chucena, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22975", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22976", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Lucena del Puerto, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22976", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22977", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Magán, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22977", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22978", "titulo_corto": "Convenio entre la Secretaría de Estado de Seguridad y el Ayuntamiento de Siruela, en materia de seguridad.", "departamento": "Ministerio del Interior", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22978", "relevancia": 0, "motivo": "Convenio de seguridad entre el Ministerio del Interior y un ayuntamiento o comunidad. No afecta a empresas.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22979", "titulo_corto": "Convenio con el Ente Público Ports de les Illes Balears, relativo a la determinación de la formación náutica del…", "departamento": "Ministerio de Transportes y Movilidad Sostenible", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22979", "relevancia": 0, "motivo": "Asunto interno de puertos y marina mercante.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22980", "titulo_corto": "Delegación de competencias en la Autoridad Portuaria de Cartagena", "departamento": "Ministerio de Transportes y Movilidad Sostenible", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22980", "relevancia": 0, "motivo": "Asunto interno de puertos y marina mercante.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22981", "titulo_corto": "Convenio con la Comunidad Autónoma de Canarias, para la organización del X Congreso Estatal de Convivencia Escolar.", "departamento": "Ministerio de Educación, Formación Profesional y Deportes", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22981", "relevancia": 0, "motivo": "Programa educativo de la Administración.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22982", "titulo_corto": "Convenio con el Ayuntamiento de Renedo de Esgueva, para el desarrollo del programa de formación abierta «Aula Mentor».", "departamento": "Ministerio de Educación, Formación Profesional y Deportes", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22982", "relevancia": 0, "motivo": "Programa educativo de la Administración.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22983", "titulo_corto": "Convenio con el Ayuntamiento de Villanueva de los Castillejos, para el desarrollo del programa de formación abierta…", "departamento": "Ministerio de Educación, Formación Profesional y Deportes", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22983", "relevancia": 0, "motivo": "Programa educativo de la Administración.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22984", "titulo_corto": "Convenio con la Asociación Nacional de Ingenieros Agrónomos, para la organización conjunta del VI Congreso Nacional…", "departamento": "Ministerio de Agricultura, Pesca y Alimentación", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22984", "relevancia": 0, "motivo": "Convenio de formación agraria.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22985", "titulo_corto": "Lugar de Memoria democrática «La ciudad de Ferrol».", "departamento": "Ministerio de Política Territorial y Memoria Democrática", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22985", "relevancia": 0, "motivo": "Declaración histórica o cultural.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22988", "titulo_corto": "Convenio con la Universidad Politécnica de Madrid, para la incorporación al Observatorio de la Vulnerabilidad Urbana…", "departamento": "Ministerio de Vivienda y Agenda Urbana", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22988", "relevancia": 0, "motivo": "Convenio administrativo sobre urbanismo o vivienda. Sin efecto directo para los clientes.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22989", "titulo_corto": "Convenio de modificación y prórroga del Memorándum de Entendimiento con la Oficina Regional para América Latina y el…", "departamento": "Ministerio de Vivienda y Agenda Urbana", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22989", "relevancia": 0, "motivo": "Convenio administrativo sobre urbanismo o vivienda. Sin efecto directo para los clientes.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22990", "titulo_corto": "Convenio con la Federación Española de Municipios y Provincias, para la difusión y efectiva implementación de la…", "departamento": "Ministerio de Vivienda y Agenda Urbana", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22990", "relevancia": 0, "motivo": "Convenio administrativo sobre urbanismo o vivienda. Sin efecto directo para los clientes.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22991", "titulo_corto": "Convenio con la Sociedad Mercantil Estatal de Acción Cultural, SA, con motivo de la 20.ª edición de la Bienal de…", "departamento": "Ministerio de Vivienda y Agenda Urbana", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22991", "relevancia": 0, "motivo": "Ayudas y convenios culturales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22992", "titulo_corto": "Bases de las ayudas «Residencias Artísticas Joaquim Jordà» para cine experimental", "departamento": "Ministerio de Cultura", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22992", "relevancia": 0, "motivo": "Ayudas y convenios culturales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22993", "titulo_corto": "Convenio con la Fundación Centro Cultural Internacional Oscar Niemeyer Principado de Asturias, para el apoyo técnico…", "departamento": "Ministerio de Cultura", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22993", "relevancia": 0, "motivo": "Ayudas y convenios culturales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22994", "titulo_corto": "Convenio con Red Española de Asociaciones de Diseño Gráfico, Interior y de Producto, para la internacionalización…", "departamento": "Ministerio de Cultura", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22994", "relevancia": 0, "motivo": "Ayudas y convenios culturales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22995", "titulo_corto": "Convenio con el Gobierno de Aragón, para la comprobación de la residencia que figura en la base padronal de las…", "departamento": "Ministerio de Economía, Comercio y Empresa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22995", "relevancia": 0, "motivo": "Convenio estadístico sobre el padrón entre administraciones.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22996", "titulo_corto": "Adenda de modificación del Convenio con la Federación de Gremios de Editores de España, para la organización de la…", "departamento": "Ministerio de Economía, Comercio y Empresa", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22996", "relevancia": 0, "motivo": "Convenio de promoción comercial de un sector concreto (editorial). Sin efecto para los clientes.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22998", "titulo_corto": "Adenda de modificación y prórroga del Convenio con la Universitat de València, para el mantenimiento del Registro…", "departamento": "Ministerio de Sanidad", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22998", "relevancia": 0, "motivo": "Convenio sanitario o social entre administraciones.", "leida_a_fondo": false}, {"id": "BOE-A-2026-22999", "titulo_corto": "Convenio entre el Centro de Referencia Estatal y Atención a Personas con Enfermedad de Alzheimer y otras Demencias y…", "departamento": "Ministerio de Derechos Sociales, Consumo y Agenda 2030", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-22999", "relevancia": 0, "motivo": "Convenio sanitario o social entre administraciones.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23000", "titulo_corto": "Convenio con la Comunidad de Castilla y León, relativo al establecimiento de un marco general de colaboración para…", "departamento": "Ministerio de Ciencia, Innovación y Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23000", "relevancia": 0, "motivo": "Convenio de investigación entre organismos públicos.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23001", "titulo_corto": "Convenio con la Universidad de León, para establecer la colaboración para la realización de prácticas externas y/o…", "departamento": "Ministerio de Ciencia, Innovación y Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23001", "relevancia": 0, "motivo": "Convenio de investigación entre organismos públicos.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23002", "titulo_corto": "Convenio con el Cabildo Insular de Tenerife, para el impulso de actividades de investigación, desarrollo e…", "departamento": "Ministerio de Ciencia, Innovación y Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23002", "relevancia": 0, "motivo": "Convenio de investigación entre organismos públicos.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23003", "titulo_corto": "Convenio entre el Instituto Nacional de la Seguridad Social, la Tesorería General de la Seguridad Social, la…", "departamento": "Ministerio de Inclusión, Seguridad Social y Migraciones", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23003", "relevancia": 0, "motivo": "Convenio de Seguridad Social entre administraciones.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23004", "titulo_corto": "Cierre de la tramitación de adopciones internacionales con Lituania", "departamento": "Ministerio de Juventud E Infancia", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23004", "relevancia": 0, "motivo": "Adopciones internacionales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23005", "titulo_corto": "Cierre de la tramitación de adopciones internacionales con Moldavia", "departamento": "Ministerio de Juventud E Infancia", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23005", "relevancia": 0, "motivo": "Adopciones internacionales, fuera del ámbito del despacho.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23006", "titulo_corto": "Adenda de modificación del Acuerdo de encomienda de funciones a la Xunta de Galicia.", "departamento": "Consejo de Seguridad Nuclear", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23006", "relevancia": 0, "motivo": "Encargo de funciones de seguridad nuclear a una comunidad autónoma.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23007", "titulo_corto": "Declaración de bien de interés cultural de unos desfiles cívicos en Mallorca", "departamento": "Administración Local", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23007", "relevancia": 0, "motivo": "Declaración histórica o cultural.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23008", "titulo_corto": "Plan de estudios de Máster Universitario en Inteligencia Artificial.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23008", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23009", "titulo_corto": "Plan de estudios de Máster Universitario en Neurociencia y Neurotecnología.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23009", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23010", "titulo_corto": "Plan de estudios de Graduado o Graduada en Gestión de Proyectos Internacionales de Ingeniería Civil.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23010", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23011", "titulo_corto": "Plan de estudios de Graduado o Graduada en Inteligencia de Negocio y Analítica de Datos.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23011", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23012", "titulo_corto": "Plan de estudios de Máster Universitario en Comercio Exterior y Relaciones Económicas Internacionales.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23012", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23013", "titulo_corto": "Plan de estudios de Máster Universitario en Educación Digital y Emprendimiento.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23013", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23014", "titulo_corto": "Plan de estudios de Máster Universitario en Enfermería de Práctica Avanzada.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23014", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23015", "titulo_corto": "Plan de estudios de Máster Universitario en Investigación sobre Estilos de Vida Activos y Saludables.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23015", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}, {"id": "BOE-A-2026-23016", "titulo_corto": "Plan de estudios de Graduado o Graduada en Inteligencia y Analítica de Mercados.", "departamento": "Universidades", "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-23016", "relevancia": 0, "motivo": "Plan de estudios de una universidad.", "leida_a_fondo": false}], "leidas_a_fondo": 7}}}</script>
+<script>
+const DATOS = JSON.parse(document.getElementById("datos").textContent);
+const DIAS = Object.keys(DATOS.dias).sort().reverse();
+// Áreas: tono de color, nombre corto e icono.
+const AREAS = [
+  ["Regulatorio financiero",212,"Financiero",'<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',"Bancos, gestoras de fondos, EAFI, fintech, cripto y aseguradoras: las normas que les dicen qué pueden hacer y cómo."],
+  ["M&A",268,"M&A",'<path d="M8 12l-4 4 4 4M4 16h11M16 4l4 4-4 4M20 8H9"/>',"Compras, ventas y fusiones de empresas."],
+  ["Societario",190,"Societario",'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/>',"Cómo se organizan y gobiernan las sociedades: juntas, consejos, estatutos."],
+  ["Compliance",150,"Compliance",'<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',"Que la empresa cumpla las normas y tenga controles para evitar riesgos."],
+  ["Concursal y reestructuración",8,"Concursal",'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',"Empresas con problemas para pagar sus deudas."],
+  ["Startups",320,"Startups",'<path d="M5 19c1-3 3-5 5-6M14 4c3 0 6 3 6 6l-7 7-6-6z"/><circle cx="15" cy="9" r="1.5"/>',"Empresas jóvenes: rondas de inversión, pactos de socios, incentivos."],
+  ["Energía",38,"Energía",'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',"Renovables, electricidad, gas y contratos de energía."],
+  ["Procesal",240,"Procesal",'<path d="M14 4l6 6M12 6l6 6M5 19l7-7M3 21h8"/>',"Juicios y tribunales: cómo se reclama y se defiende un caso."],
+  ["Protección de datos e IA",290,"Datos e IA",'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',"RGPD y el Reglamento europeo de Inteligencia Artificial."],
+  ["Fiscal",120,"Fiscal",'<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',"Impuestos de empresas y operaciones."]
+];
+const AREA = Object.fromEntries(AREAS.map((a,i) => [a[0], {i, h:a[1], corto:a[2], icon:a[3], txt:a[4]}]));
+const areaDe = n => AREA[n] || {i:0, h:210, corto:n, icon:'<circle cx="12" cy="12" r="8"/>', txt:""};
+const ico = (n, cls="") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${areaDe(n).icon}</svg>`;
+const areaChip = n => `<span class="area-t">${esc(n)}</span>`;
+const areasTxt = f => `<span class="areas-t">${(f.areas||[]).map(areaChip).join('<span class="sep">·</span>')}</span>`;
+const GLOSARIO = [
+  ["BOE","Boletín Oficial del Estado. El periódico oficial donde se publican las leyes y demás normas de España. Una norma no obliga hasta que se publica."],
+  ["Ley","Norma aprobada por las Cortes Generales (Congreso y Senado). Es la de mayor rango después de la Constitución."],
+  ["Real Decreto-ley","Norma con fuerza de ley que aprueba el Gobierno en casos de urgencia. El Congreso tiene 30 días para convalidarla."],
+  ["Real Decreto","Reglamento aprobado por el Consejo de Ministros. Desarrolla y concreta lo que dice una ley."],
+  ["Orden ministerial","Norma aprobada por un ministro. Tiene menos rango que un Real Decreto y suele regular detalles técnicos. Las letras indican el ministerio: «Orden TED» es de Transición Ecológica."],
+  ["Circular","Norma que dictan organismos como la CNMV o el Banco de España para las entidades que supervisan."],
+  ["Resolución","Decisión de un órgano de la Administración. Puede ser una norma menor o un acto concreto, como autorizar un proyecto."],
+  ["Entrada en vigor","Fecha desde la que una norma empieza a obligar. Si no dice nada, son 20 días después de publicarse en el BOE."],
+  ["CNMV","Comisión Nacional del Mercado de Valores. Supervisa la Bolsa, los fondos de inversión y las empresas de servicios de inversión."],
+  ["Banco de España","Supervisa a los bancos españoles junto con el Banco Central Europeo."],
+  ["SGIIC","Sociedad gestora de instituciones de inversión colectiva. En pocas palabras, una gestora de fondos de inversión."],
+  ["EAFI","Empresa de asesoramiento financiero. Asesora sobre inversiones pero no puede gestionar el dinero del cliente."],
+  ["MiCA","Reglamento europeo que regula las criptomonedas y a las empresas que prestan servicios con ellas."],
+  ["Due diligence","Revisión a fondo de una empresa antes de comprarla o invertir en ella para detectar riesgos legales."],
+  ["DIA","Declaración de impacto ambiental. El informe final con el que la Administración fija las condiciones ambientales de un proyecto antes de autorizarlo."],
+  ["Hibridación","Añadir otra tecnología a una planta que ya existe (por ejemplo, solar a un parque eólico) aprovechando la misma conexión a la red."],
+  ["Régimen retributivo específico","Sistema de ayudas reguladas que reciben algunas plantas renovables y de cogeneración además de lo que cobran en el mercado."],
+  ["Obligaciones del Estado","Títulos de deuda pública a más de cinco años. Así se financia el Estado."],
+  ["PPA","Contrato de compraventa de energía a largo plazo entre un productor renovable y un consumidor."]
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MES3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const DSEM = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const aFecha = f => new Date(+f.slice(0,4), +f.slice(4,6)-1, +f.slice(6,8));
+const isoAFecha = s => new Date(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10));
+const isoDe = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const largo = d => `${DSEM[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+const corto = d => `${d.getDate()} ${MES3[d.getMonth()]}`;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function load(k, def){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }catch(e){ return def; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+let estados = load("radar.estados", {});
+let notas = load("radar.notas", {});
+let diaSel = load("radar.dia", DIAS[0]); if(!DATOS.dias[diaSel]) diaSel = DIAS[0];
+let filtro = {estado:"todas", area:"", rel:""};
+const chats = {};
+
+const ESTADO = {pend:["Sin leer","p-pend"], leida:["Leída","p-leida"], env:["Enviada al equipo","p-env"]};
+const estadoDe = id => estados[id] || "pend";
+const relPill = r => r >= 3 ? '<span class="pill p-alta">Relevancia alta</span>' : '<span class="pill p-media">Relevancia media</span>';
+const meter = r => `<span class="meter r${r}" title="Relevancia ${r>=3?"alta":"media"}"><i></i><i></i><i></i></span>`;
+const estPill = id => { const [t,c] = ESTADO[estadoDe(id)]; return `<span class="pill ${c}">${t}</span>`; };
+const dia = () => DATOS.dias[diaSel];
+const fichas = () => [...(dia().fichas || [])].sort((a,b) => (b.relevancia||0)-(a.relevancia||0));
+const todasFichas = () => DIAS.flatMap(d => (DATOS.dias[d].fichas||[]).map(f => ({...f, _dia:d})));
+const buscar = () => $("#q").value.trim().toLowerCase();
+const coincide = f => { const q = buscar(); if(!q) return true; return [f.titulo,f.titulo_corto,f.que_cambia,f.a_quien_afecta,f.departamento,f.id,(f.areas||[]).join(" ")].join(" ").toLowerCase().includes(q); };
+const hue = f => areaDe((f.areas||[])[0]).h;
+
+function toast(t){ const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2200); }
+function setEstado(id, e){ estados[id] = e; save("radar.estados", estados); toast(e === "env" ? "Marcada como enviada al equipo" : e === "leida" ? "Marcada como leída" : "Marcada como pendiente"); render(); }
+function plazos(){ const out = []; todasFichas().forEach(f => (f.fechas_clave||[]).forEach(p => out.push({...p, ficha:f}))); return out.sort((a,b) => a.fecha.localeCompare(b.fecha)); }
+function faltan(iso){ const n = Math.round((isoAFecha(iso) - aFecha(diaSel))/86400000); return n === 0 ? "hoy" : n === 1 ? "mañana" : n > 1 ? `en ${n} días` : `hace ${-n} días`; }
+
+// ---------- Vistas ----------
+function card(f){
+  const p = (f.fechas_clave||[])[0];
+  return `<a class="panel fc" href="#ficha-${f.id}" style="--h:${hue(f)}">
+    <div class="top-row">${relPill(f.relevancia)}${estPill(f.id)}</div>
+    <h2>${esc(f.titulo_corto || f.titulo)}</h2>
+    <p>${esc(f.que_cambia)}</p>
+    <div class="foot">${areasTxt(f)}${p ? `<span class="note">${corto(isoAFecha(p.fecha))} · ${faltan(p.fecha)}</span>` : ""}</div>
+  </a>`;
+}
+function vInicio(){
+  const fs = fichas(), d = dia(), D = aFecha(diaSel);
+  const desc = d.descartadas || [], auto = d.filtradas_auto || [];
+  const total = d.total_boe ?? (fs.length + desc.length + auto.reduce((s,x) => s + x.n, 0));
+  const nAuto = auto.reduce((s,x) => s + x.n, 0), noValen = total - fs.length;
+  const altas = fs.filter(f => f.relevancia >= 3).length;
+  const lunes = new Date(D); lunes.setDate(D.getDate() - ((D.getDay()+6)%7));
+  const ps = plazos();
+  const semana = [...Array(7)].map((_,i) => { const x = new Date(lunes); x.setDate(lunes.getDate()+i); const iso = isoDe(x);
+    const evs = ps.filter(p => p.fecha === iso);
+    return `<div class="wd ${isoDe(D)===iso?"hoy":""}"><span class="w">${DSEM[x.getDay()].slice(0,3)}</span><span class="n">${x.getDate()}</span>${evs.map(p => `<a class="ev" href="#ficha-${p.ficha.id}" style="border-left-color:hsl(${hue(p.ficha)} 62% 50%)">${esc(p.texto)}</a>`).join("")}</div>`; }).join("");
+  const grupos = {}; desc.forEach(x => (grupos[x.motivo] = grupos[x.motivo] || []).push(x));
+  const listaNo = Object.entries(grupos).sort((a,b) => b[1].length - a[1].length).map(([m, xs]) => `<details class="grp"><summary><span>${esc(m)}</span><span class="cnt">${xs.length}</span></summary><ul>${xs.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.titulo_corto)}</a>${x.leida_a_fondo ? ' <span class="pill p-leida">· Leída entera</span>' : ""}<span class="note">${esc(x.departamento)}</span></li>`).join("")}</ul></details>`).join("")
+    + auto.map(x => `<details class="grp"><summary><span>${esc(x.motivo)} <span class="note">· descartadas por el filtro automático</span></span><span class="cnt">${x.n}</span></summary><p class="note" style="margin:0;padding:0 0 12px">El filtro las descarta sin leerlas porque este tipo de publicación nunca afecta a los clientes del despacho.</p></details>`).join("");
+  return `
+  <section class="panel triage">
+    <div><div class="eyebrow">BOE · ${cap(largo(D))} ${D.getFullYear()}</div><h1>Lo que ha revisado la IA hoy</h1></div>
+    <div class="tri">
+      <div><span class="lbl">Revisadas</span><b>${total}</b><span class="note">Todo el BOE del día: ${nAuto} descartadas por el filtro automático, ${(d.revisadas ?? 0)} revisadas una a una y ${d.leidas_a_fondo ?? "?"} leídas enteras.</span></div>
+      <div class="ok"><span class="lbl">Valen</span><b>${fs.length}</b><span class="note">${altas} de relevancia alta y ${fs.length - altas} de relevancia media.</span><a class="btn" href="#bandeja">Ver las que valen</a></div>
+      <div class="no"><span class="lbl">No valen</span><b>${noValen}</b><span class="note">No afectan a los clientes del despacho. Puedes ver por qué se ha descartado cada una.</span><button class="btn" id="ver-no">Ver por qué</button></div>
+    </div>
+    <div class="split" title="${fs.length} de ${total} valen"><i style="width:${Math.max(1.5, fs.length/Math.max(total,1)*100)}%"></i></div>
+  </section>
+  <section class="panel pad"><h3>Resumen del día</h3><p class="resumen">${esc(d.resumen_del_dia)}</p></section>
+  <section style="display:flex;flex-direction:column;gap:14px">
+    <div class="sec-head"><h2>Las que valen</h2><a class="btn" href="#bandeja">Abrir bandeja</a></div>
+    <div class="cards">${fs.map(card).join("") || '<div class="panel empty">Hoy no hay nada relevante para el despacho.</div>'}</div>
+  </section>
+  <section class="panel pad" id="no-valen"><div class="sec-head"><h2>Las que no valen y por qué</h2></div><div class="grps">${listaNo || '<p class="note">No hay datos de descartes para este día.</p>'}</div></section>
+  <section class="panel pad"><div class="sec-head"><h3>Plazos de esta semana</h3><a class="btn" href="#plazos">Todos los plazos</a></div>
+    <div class="week" style="margin-top:14px">${semana}</div>
+  </section>`;
+}
+
+function vBandeja(){
+  const base = fichas().filter(coincide);
+  const cuenta = e => e === "todas" ? base.length : base.filter(f => estadoDe(f.id) === e).length;
+  const fs = base.filter(f => (filtro.estado === "todas" || estadoDe(f.id) === filtro.estado) && (!filtro.area || (f.areas||[]).includes(filtro.area)) && (!filtro.rel || String(f.relevancia) === filtro.rel));
+  const tab = (k,t) => `<button class="tab ${filtro.estado===k?"on":""}" data-estado="${k}">${t}<span class="n">${cuenta(k)}</span></button>`;
+  return `<div><h1>Bandeja</h1><p class="sub">Las normas del BOE que la IA ha marcado como relevantes. Ábrelas, léelas y márcalas cuando las hayas revisado.</p></div>
+  <div class="sec-head"><div class="tabs">${tab("todas","Todas")}${tab("pend","Sin leer")}${tab("leida","Leídas")}${tab("env","Enviadas")}</div>
+    <div class="filters"><select id="f-area" aria-label="Área"><option value="">Todas las áreas</option>${AREAS.map(a => `<option ${filtro.area===a[0]?"selected":""}>${a[0]}</option>`).join("")}</select>
+    <select id="f-rel" aria-label="Relevancia"><option value="">Cualquier relevancia</option><option value="3" ${filtro.rel==="3"?"selected":""}>Alta</option><option value="2" ${filtro.rel==="2"?"selected":""}>Media</option></select></div></div>
+  <div class="cards">${fs.map(card).join("")}</div>${fs.length ? "" : '<div class="panel empty">No hay normas con estos filtros.</div>'}`;
+}
+
+let tabFicha = "resumen";
+function vFicha(id){
+  const f = todasFichas().find(x => x.id === id);
+  if(!f) return `<div class="panel empty">No encuentro esa norma. <a href="#bandeja">Volver a la bandeja</a></div>`;
+  const e = estadoDe(f.id), a0 = (f.areas||[])[0];
+  const T = (k,t) => `<button class="ptab ${tabFicha===k?"on":""}" data-tab="${k}">${t}</button>`;
+  let pane = "";
+  if(tabFicha === "resumen") pane = `<div class="field"><h3>Qué cambia</h3><p>${esc(f.que_cambia)}</p></div><div class="field"><h3>A quién afecta</h3><p>${esc(f.a_quien_afecta)}</p></div><div class="field"><h3>Plazos</h3><p>${esc(f.plazos)}</p></div>`;
+  if(tabFicha === "facil") pane = `<div class="explain"><span class="q">?</span><div>${esc(f.para_no_juristas)}</div></div>`;
+  if(tabFicha === "accion") pane = `<div class="field"><h3>Qué podría hacer el despacho</h3><p>${esc(f.accion_para_ilp)}</p></div><div class="field"><h3>Mis notas</h3><textarea id="nota" placeholder="Apunta lo que quieras comentar con tu tutor sobre esta norma.">${esc(notas[f.id]||"")}</textarea><span class="saved" id="nota-ok">Se guarda solo en este navegador.</span></div>`;
+  if(tabFicha === "oficial") pane = `<p style="font-size:17px;margin:0">${esc(f.titulo)}</p><p class="note" style="margin:0">${esc(f.departamento)} · <span class="mono">${esc(f.id)}</span></p><div class="row"><a class="btn primary" href="${esc(f.url)}" target="_blank" rel="noopener">Abrir el texto en el BOE</a></div><p class="note">La ficha es un resumen hecho con IA. Antes de usarla para asesorar, lee siempre el texto oficial.</p>`;
+  if(tabFicha === "ia"){ const c = chats[f.id] || [];
+    pane = `<div class="chat" id="chat">${c.map(m => `<div class="msg ${m.role==="user"?"yo":"ia"}">${esc(m.content)}</div>`).join("") || '<p class="note" style="margin:0">Pregunta lo que quieras sobre esta norma. La IA solo conoce la ficha, así que para detalles concretos comprueba el texto oficial.</p>'}</div>
+      <div class="sugg" id="sugg">${["Explícamelo como si fuera de primero de carrera","¿Cómo se lo resumo a mi tutor en dos frases?","¿Qué conceptos debería repasar para entender esto?","¿Qué preguntas le haría un cliente?"].map(s => `<button type="button">${s}</button>`).join("")}</div>
+      <form class="ask" id="ask"><input id="ask-q" placeholder="Escribe tu pregunta" autocomplete="off"><button class="btn primary" id="ask-b">Preguntar</button></form>
+      <p class="note" id="ia-off" hidden>El chat con la IA no está disponible en esta vista.</p>`; }
+  return `<div class="row"><a class="btn" href="#bandeja">← Bandeja</a></div>
+  <section class="fhero" style="--h:${hue(f)}">
+    <div style="min-width:0"><div class="row" style="gap:18px">${relPill(f.relevancia)}${estPill(f.id)}</div>
+      <h1>${esc(f.titulo_corto || f.titulo)}</h1>
+      <div class="row" style="gap:14px">${areasTxt(f)}<span class="mono">${esc(f.id)} · BOE del ${largo(aFecha(f._dia))}</span></div></div>
+  </section>
+  <div class="layout">
+    <section class="panel"><div class="ptabs">${T("resumen","Resumen")}${T("facil","Explicado fácil")}${T("accion","Acción y notas")}${T("oficial","Texto oficial")}</div><div class="pane">${pane}</div></section>
+    <aside class="aside">
+      <section class="panel pad actions"><h3 style="margin-bottom:4px">Acciones</h3>
+        ${e === "pend" ? '<button class="btn primary" data-set="leida">Marcar como leída</button>' : ""}
+        ${e === "leida" ? '<button class="btn primary" data-set="env">Marcar como enviada al equipo</button>' : ""}
+        <button class="btn" id="b-copiar">Copiar resumen para un email</button>
+        <a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">Ver en el BOE</a>
+        ${e !== "pend" ? '<button class="btn" data-set="pend">Volver a pendiente</button>' : ""}
+      </section>
+      <section class="panel pad"><h3 style="margin-bottom:12px">Fechas clave</h3>
+        <ul class="tl"><li><div><b>${corto(aFecha(f._dia))}</b><span>Publicación en el BOE</span></div></li>${(f.fechas_clave||[]).map(p => `<li><div><b>${corto(isoAFecha(p.fecha))} · ${faltan(p.fecha)}</b><span>${esc(p.texto)}</span></div></li>`).join("")}</ul>
+      </section>
+      <section class="panel pad"><h3 style="margin-bottom:6px">Organismo</h3><span>${esc(f.departamento)}</span></section>
+    </aside>
+  </div>`;
+}
+
+function vPlazos(){
+  const ps = plazos().filter(p => coincide(p.ficha));
+  return `<div><h1>Plazos</h1><p class="sub">Fechas importantes que salen de las normas: entradas en vigor, subastas, fines de plazo.</p></div>
+  <section class="panel pad"><ul class="tl">${ps.map(p => `<li><div><b>${cap(largo(isoAFecha(p.fecha)))} · ${faltan(p.fecha)}</b><span>${esc(p.texto)} · <a href="#ficha-${p.ficha.id}">${esc(p.ficha.titulo_corto || p.ficha.id)}</a></span></div></li>`).join("") || '<li><div><b>No hay plazos</b></div></li>'}</ul></section>`;
+}
+function vAreas(){
+  const fs = fichas();
+  return `<div><h1>Áreas del despacho</h1><p class="sub">Cuántas novedades de hoy toca cada área. Pulsa una para ver sus normas.</p></div>
+  <section class="agrid">${AREAS.map(([n,h,c,_,t]) => { const k = fs.filter(f => (f.areas||[]).includes(n)).length;
+    return `<a class="panel ac" href="#bandeja" data-area="${esc(n)}" style="--h:${h}"><span class="num ${k?"":"zero"}">${k}</span><b class="row"><i class="adot" style="color:hsl(${h} 62% 50%)"></i>${esc(n)}</b><span class="note">${esc(t)}</span></a>`; }).join("")}</section>`;
+}
+function vGlosario(){
+  const q = buscar(); const g = GLOSARIO.filter(([t,d]) => !q || (t+" "+d).toLowerCase().includes(q));
+  return `<div><h1>Glosario</h1><p class="sub">Los términos que más vas a ver en el BOE, explicados en una frase.</p></div>
+  <section class="gl">${g.map(([t,d]) => `<div class="panel gc"><b>${esc(t)}</b><p>${esc(d)}</p></div>`).join("") || '<div class="panel empty">Ningún término coincide con la búsqueda.</div>'}</section>`;
+}
+function vComo(){
+  const d = dia(), fs = fichas(), desc = d.descartadas || [], nAuto = (d.filtradas_auto||[]).reduce((s,x) => s + x.n, 0);
+  const ej = fs[0];
+  const faq = [
+    ["¿Puedo fiarme de las fichas?","Son un primer filtro y un resumen de trabajo. La IA lee el texto oficial, pero puede equivocarse o dejarse un matiz. Antes de asesorar o enviar algo a un cliente, abre siempre la norma en el BOE (botón «Ver en el BOE» de cada ficha)."],
+    ["¿Cuándo se actualiza?","De lunes a viernes a primera hora (8:15, hora peninsular). Los días sin BOE, como algunos festivos, no hay actualización. Con el selector de arriba a la derecha puedes consultar días anteriores."],
+    ["¿Por qué se descarta una norma?","Porque no cambia obligaciones ni oportunidades para los clientes del despacho: oposiciones, nombramientos, convenios entre administraciones, planes de estudio… En la portada, en «Las que no valen y por qué», puedes revisar cada descarte y su motivo."],
+    ["¿Dónde se guardan mis notas y lo que marco como leído?","Solo en tu navegador, en el dispositivo en el que lo marcas. No lo ve nadie más y no se comparte al enviar el enlace."],
+    ["¿Puedo escribir datos de clientes?","No. No escribas nombres de clientes ni información confidencial en las notas ni en el chat con la IA."],
+    ["¿Qué fuentes revisa?","Hoy, el Boletín Oficial del Estado completo. Están previstas la CNMV, el Diario Oficial de la UE y el Banco de España."]
+  ];
+  return `
+  <section class="panel guide-hero">
+    <div class="eyebrow">Guía de uso</div>
+    <h1>Radar BOE en dos minutos</h1>
+    <p class="lead">Cada mañana, Radar BOE lee el Boletín Oficial del Estado, separa lo que importa a los clientes del despacho de lo que no y lo resume en fichas listas para leer, comentar o reenviar.</p>
+    <div class="row"><a class="btn primary" href="#inicio">Ir a la portada</a><a class="btn" href="#bandeja">Abrir la bandeja</a></div>
+  </section>
+
+  <section class="gsec">
+    <div class="gh"><span class="gnum">1</span><div><h2>Qué pasa cada mañana</h2><p class="sub">Con las cifras reales del BOE del ${largo(aFecha(diaSel))}.</p></div></div>
+    <div class="pipe">
+      <div class="panel pstep"><span class="hora">8:15</span><b>Descarga</b><span class="big">${d.total_boe ?? "?"}</span><span class="note">disposiciones publicadas en el BOE del día.</span></div>
+      <div class="panel pstep"><span class="hora">Filtro</span><b>Descarta el ruido</b><span class="big">−${nAuto}</span><span class="note">oposiciones, nombramientos y anuncios que nunca afectan a un cliente.</span></div>
+      <div class="panel pstep"><span class="hora">Revisión</span><b>Lee y puntúa</b><span class="big">${d.revisadas ?? "?"}</span><span class="note">revisadas una a una; ${d.leidas_a_fondo ?? "?"} leídas enteras. Cada una recibe una puntuación de 0 a 3.</span></div>
+      <div class="panel pstep ok"><span class="hora">Resultado</span><b>Fichas</b><span class="big">${fs.length}</span><span class="note">normas que valen, con su resumen, a quién afecta, qué puede hacer el despacho y los plazos.</span></div>
+    </div>
+  </section>
+
+  <section class="gsec">
+    <div class="gh"><span class="gnum">2</span><div><h2>Cómo leer una ficha</h2><p class="sub">Todas las tarjetas siguen el mismo orden.</p></div></div>
+    <div class="anat">
+      <div class="panel fc demo">
+        <div class="top-row"><span class="pill p-alta">Relevancia alta</span><span class="pill p-pend">Sin leer</span></div>
+        <h2>${esc(ej ? (ej.titulo_corto || ej.titulo) : "Título breve de la norma")}</h2>
+        <p>${esc(ej ? ej.que_cambia : "Qué cambia, en dos o tres frases.")}</p>
+        <div class="foot">${ej ? areasTxt(ej) : ""}${ej && (ej.fechas_clave||[])[0] ? `<span class="note">${corto(isoAFecha(ej.fechas_clave[0].fecha))} · ${faltan(ej.fechas_clave[0].fecha)}</span>` : ""}</div>
+        <span class="mk" style="top:14px;left:-14px">A</span><span class="mk" style="top:14px;right:-14px">B</span><span class="mk" style="top:58px;left:-14px">C</span><span class="mk" style="bottom:16px;left:-14px">D</span><span class="mk" style="bottom:16px;right:-14px">E</span>
+      </div>
+      <ol class="legend-list">
+        <li><span class="mk s">A</span><div><b>Relevancia</b><span>Alta si cambia obligaciones de clientes típicos del despacho (bancos, gestoras, fintech, energéticas…) o normas mercantiles generales. Media si es útil para algún cliente o para un artículo.</span></div></li>
+        <li><span class="mk s">B</span><div><b>Estado</b><span>Sin leer, Leída o Enviada al equipo. Lo cambias desde la ficha.</span></div></li>
+        <li><span class="mk s">C</span><div><b>Título y resumen</b><span>Un título claro y qué cambia la norma. El título oficial completo está en la pestaña «Texto oficial».</span></div></li>
+        <li><span class="mk s">D</span><div><b>Áreas</b><span>Las áreas de práctica a las que toca la norma.</span></div></li>
+        <li><span class="mk s">E</span><div><b>Próxima fecha</b><span>Entrada en vigor, subasta o fin de plazo, y cuánto falta.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="gsec">
+    <div class="gh"><span class="gnum">3</span><div><h2>Tu rutina diaria</h2><p class="sub">Cinco minutos por la mañana.</p></div></div>
+    <div class="routine">
+      <div class="panel rstep"><span class="rn">01</span><b>Mira la portada</b><span class="note">Las tres cifras de arriba te dicen cuánto se ha revisado y cuánto vale hoy. Lee el resumen del día.</span></div>
+      <div class="panel rstep"><span class="rn">02</span><b>Abre la bandeja</b><span class="note">Empieza por las de relevancia alta. Filtra por área si solo te interesa una.</span></div>
+      <div class="panel rstep"><span class="rn">03</span><b>Lee la ficha</b><span class="note">Resumen, acción para el despacho y plazos. Si algo no queda claro, abre el texto oficial.</span></div>
+      <div class="panel rstep"><span class="rn">04</span><b>Comparte</b><span class="note">«Copiar resumen para un email» prepara un texto con el enlace oficial. Después márcala como enviada.</span></div>
+    </div>
+    <div class="panel flowstate"><span class="pill p-pend">Sin leer</span><span class="arr">→</span><span class="pill p-leida">Leída</span><span class="arr">→</span><span class="pill p-env">Enviada al equipo</span><span class="note" style="margin-left:auto">Así sabes qué te queda por revisar.</span></div>
+  </section>
+
+  <section class="gsec">
+    <div class="gh"><span class="gnum">4</span><div><h2>Qué hay en cada sección</h2></div></div>
+    <div class="secs">
+      <a class="panel sc" href="#inicio"><b>Inicio</b><span class="note">Cifras del día, resumen, las normas que valen, las que no y por qué, y los plazos de la semana.</span></a>
+      <a class="panel sc" href="#bandeja"><b>Bandeja</b><span class="note">Todas las normas que valen, con pestañas por estado y filtros por área y relevancia.</span></a>
+      <a class="panel sc" href="#plazos"><b>Plazos</b><span class="note">Calendario de fechas clave sacadas de las normas: entradas en vigor, subastas, fines de plazo.</span></a>
+      <a class="panel sc" href="#areas"><b>Áreas</b><span class="note">Cuántas novedades tiene hoy cada área de práctica. Pulsa una para ver solo las suyas.</span></a>
+      <div class="panel sc"><b>Ficha de cada norma</b><span class="note">Cuatro pestañas: Resumen, Explicado fácil, Acción y notas y Texto oficial.</span></div>
+      <div class="panel sc"><b>Buscador y selector de día</b><span class="note">Arriba a la derecha: busca por palabra, organismo o área, y consulta el BOE de días anteriores.</span></div>
+    </div>
+  </section>
+
+  <section class="gsec">
+    <div class="gh"><span class="gnum">5</span><div><h2>Preguntas frecuentes</h2></div></div>
+    <div class="panel faq">${faq.map(([q,a],i) => `<details ${i===0?"open":""}><summary>${q}</summary><p>${a}</p></details>`).join("")}</div>
+  </section>`;
+}
+
+// ---------- Router ----------
+const ruta = () => location.hash.slice(1) || "inicio";
+function render(){
+  const r = ruta(); let v = r.startsWith("ficha-") ? "ficha" : r;
+  const vistas = {inicio:vInicio, bandeja:vBandeja, plazos:vPlazos, areas:vAreas, "como-funciona":vComo};
+  if(v !== "ficha" && !vistas[v]) v = "inicio";
+  $("#view").innerHTML = v === "ficha" ? vFicha(r.slice(6)) : vistas[v]();
+  const nombres = {inicio:"Inicio", bandeja:"Bandeja", plazos:"Plazos", areas:"Áreas", "como-funciona":"Guía", ficha:"Norma"};
+  $("#crumbs").innerHTML = `Radar BOE / <b>${nombres[v]}</b>`;
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.v === v || (v === "ficha" && a.dataset.v === "bandeja")));
+  $("#nav-pend").textContent = fichas().filter(f => estadoDe(f.id) === "pend").length;
+  enlazar(v, r);
+}
+function enlazar(v, r){
+  const view = $("#view");
+  view.querySelectorAll("[data-estado]").forEach(b => b.onclick = () => { filtro.estado = b.dataset.estado; render(); });
+  const vn = $("#ver-no"); if(vn) vn.onclick = () => { const s = $("#no-valen"); s.querySelector("details")?.setAttribute("open",""); s.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); };
+  const fa = $("#f-area"); if(fa) fa.onchange = () => { filtro.area = fa.value; render(); };
+  const fr = $("#f-rel"); if(fr) fr.onchange = () => { filtro.rel = fr.value; render(); };
+  view.querySelectorAll("[data-area]").forEach(a => a.onclick = () => { filtro.area = a.dataset.area; filtro.estado = "todas"; });
+  if(v !== "ficha") return;
+  const id = r.slice(6); const f = todasFichas().find(x => x.id === id); if(!f) return;
+  view.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tabFicha = b.dataset.tab; render(); });
+  view.querySelectorAll("[data-set]").forEach(b => b.onclick = () => setEstado(id, b.dataset.set));
+  $("#b-copiar").onclick = () => copiar(f);
+  const nota = $("#nota");
+  if(nota) nota.oninput = () => { notas[id] = nota.value; $("#nota-ok").textContent = save("radar.notas", notas) ? "Guardado en este navegador." : "No se ha podido guardar en este navegador."; };
+  if(tabFicha === "ia") prepararChat(f);
+}
+function copiar(f){
+  const t = `${f.titulo_corto || f.titulo}\n${f.titulo}\n\nQué cambia: ${f.que_cambia}\nA quién afecta: ${f.a_quien_afecta}\nPlazos: ${f.plazos}\n\nTexto oficial: ${f.url}`;
+  const fallback = () => { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast("Resumen copiado"); }catch(e){ toast("No se ha podido copiar"); } ta.remove(); };
+  try{ navigator.clipboard.writeText(t).then(() => toast("Resumen copiado"), fallback); }catch(e){ fallback(); }
+}
+
+// ---------- Chat con la IA ----------
+let samplePromise = null;
+function getSample(){ if(!samplePromise) samplePromise = (window.claude && window.claude.use) ? window.claude.use("sample").catch(() => null) : Promise.resolve(null); return samplePromise; }
+async function prepararChat(f){
+  const sample = await getSample();
+  const form = $("#ask"); if(!form) return;
+  if(!sample){ form.hidden = true; $("#sugg").hidden = true; $("#ia-off").hidden = false; return; }
+  const enviar = async q => {
+    q = q.trim(); if(!q) return;
+    const c = chats[f.id] = chats[f.id] || [];
+    c.push({role:"user", content:q}); render();
+    const out = document.createElement("div"); out.className = "msg ia"; out.textContent = "Pensando…"; $("#chat").appendChild(out);
+    $("#ask-b").disabled = true;
+    const contexto = `Eres un tutor que ayuda a Daniel, estudiante de Derecho en prácticas en un despacho de Madrid especializado en regulatorio financiero, M&A, societario y energía. Responde en español, claro y breve (máximo 150 palabras), sin tecnicismos o explicándolos. Usa solo la información de esta ficha del BOE; si la pregunta necesita algo que no está aquí, dilo y recomienda leer el texto oficial.\n\nFICHA\nTítulo: ${f.titulo}\nOrganismo: ${f.departamento}\nQué cambia: ${f.que_cambia}\nA quién afecta: ${f.a_quien_afecta}\nAcción para el despacho: ${f.accion_para_ilp}\nPlazos: ${f.plazos}\nExplicación sencilla: ${f.para_no_juristas}`;
+    const turnos = c.map((m,i) => i === 0 ? {role:"user", content: contexto + "\n\nPREGUNTA\n" + m.content} : m);
+    try{ const {text} = await sample(turnos, {cache:false, onText: ({text}) => { out.textContent = text; }}); c.push({role:"assistant", content:text}); }
+    catch(e){ c.pop(); toast(e && e.code === "not_granted" ? "No has dado permiso para usar la IA" : e && e.code === "rate_limited" ? "Demasiadas preguntas seguidas. Espera un momento." : "La IA no ha podido responder. Prueba otra vez."); }
+    if(ruta() === "ficha-" + f.id && tabFicha === "ia") render();
+  };
+  form.onsubmit = ev => { ev.preventDefault(); enviar($("#ask-q").value); };
+  $("#sugg").querySelectorAll("button").forEach(b => b.onclick = () => enviar(b.textContent));
+}
+
+const sel = $("#dia");
+sel.innerHTML = DIAS.map(d => `<option value="${d}" ${d===diaSel?"selected":""}>BOE del ${corto(aFecha(d))} ${aFecha(d).getFullYear()}</option>`).join("");
+sel.onchange = () => { diaSel = sel.value; save("radar.dia", diaSel); render(); };
+$("#q").oninput = () => { const r = ruta(); if(!["bandeja","plazos"].includes(r)) location.hash = "bandeja"; else render(); };
+window.addEventListener("hashchange", () => { tabFicha = "resumen"; render(); window.scrollTo(0,0); });
+render();
+</script>
+
+</body></html>
